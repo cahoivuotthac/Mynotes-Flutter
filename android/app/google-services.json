@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "377003607779",
+    "project_id": "learnfromfreecodecamp",
+    "storage_bucket": "learnfromfreecodecamp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377003607779:android:34b67411065eee66b1a7d6",
+        "android_client_info": {
+          "package_name": "com.example.freecodecamp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377003607779-4ivnnqqs4r2soea9sejh25ft8uvtqrj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAov4mp9SPkzQv8OV8L7AtxCX3m9yi1ZIw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377003607779-4ivnnqqs4r2soea9sejh25ft8uvtqrj2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
