@@ -8,9 +8,6 @@ import 'firebase_options.dart';
 //import 'package:firebase_auth/firebase_auth.dart'; => for FirebaseAuth.instance.createUserWithEmailAndPassword function
 //import 'firebase_options.dart'; // also for Firebase.initializeApp function
 //import 'package:firebase_core/firebase_core.dart'; => for Firebase.initializeApp function
-import 'dart:developer' as devtools
-    show
-        log; //when you want to use a specific thing in this package, if not have show then will show everything in this package
 
 void main() {
   WidgetsFlutterBinding
@@ -27,6 +24,7 @@ void main() {
           //named routes
           '/login/': (context) => const LoginView(),
           '/register/': (context) => const RegisterView(),
+          '/notes/': (context) => const NotesView(),
         }),
   );
 }
@@ -111,8 +109,10 @@ class _NotesViewState extends State<NotesView> {
                   final shouldLogout = await showLogOutDialog(context);
                   if (shouldLogout) {
                     await FirebaseAuth.instance.signOut();
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil('/login/', (route) => false);
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/login/',
+                      (route) => false,
+                    );
                   }
               }
             }, itemBuilder: (context) {

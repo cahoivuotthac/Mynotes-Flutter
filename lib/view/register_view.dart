@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:developer' as devtools show log;
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -66,26 +67,29 @@ class _RegisterViewState extends State<RegisterView> {
                 final password = _password.text;
 
                 try {
-                  final userCredential = await FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
+                  //in a try block, if things dont work properly it will go to code lines after on....
+                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
                     email: email,
                     password: password,
                   );
-                  print(userCredential);
+                  devtools.log(userCredential.toString());
                 } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password')
-                    print('Weak password');
-                  else if (e.code == 'email-already-in-use')
-                    print('Email already in use');
-                  else if (e.code == 'invalid-email')
-                    print('Invalid email entered');
+                  if (e.code == 'weak-password') {
+                    devtools.log('Weak password');
+                  } else if (e.code == 'email-already-in-use') {
+                    devtools.log('Email already in use');
+                  } else if (e.code == 'invalid-email') {
+                    devtools.log('Invalid email entered');
+                  }
                 }
               },
               child: const Text('Register')),
           TextButton(
               onPressed: () {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/login/', (route) => false);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login/',
+                  (route) => false,
+                );
               },
               child: const Text('Already registered? Login here!'))
         ],
