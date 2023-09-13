@@ -25,7 +25,8 @@ void main() {
           //named routes
           loginRoute: (context) => const LoginView(),
           registerRoute: (context) => const RegisterView(),
-          notesView: (context) => const NotesView(),
+          notesRoute: (context) => const NotesView(),
+          verifyEmailRoute: (context) => const VerifyEmailView(),
         }),
   );
 }
@@ -155,5 +156,7 @@ Future<bool> showLogOutDialog(BuildContext context) {
                 child: const Text('Log out'))
           ]);
     },
-  ).then((value) => value ?? false); //when users dismiss the dialog
+  ).then((value) =>
+      value ??
+      false); //when users dismiss the dialog (means that tap outside the dialog)
 }

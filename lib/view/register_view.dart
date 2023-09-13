@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
-
 import 'package:freecodecamp/constants/routes.dart';
+import 'package:freecodecamp/utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -67,22 +66,55 @@ class _RegisterViewState extends State<RegisterView> {
                 //grab email and password that users just entered
                 final email = _email.text;
                 final password = _password.text;
-
                 try {
                   //in a try block, if things dont work properly it will go to code lines after on....
                   await FirebaseAuth.instance.createUserWithEmailAndPassword(
                     email: email,
                     password: password,
                   );
-                  devtools.log(userCredential.toString());
+
+                  //I want email verification to be sent right after users press register button
+                  //the 'send email verification' button will be used when users have not be sent email for a long time
+                  final user = FirebaseAuth.instance.currentUser;
+                  await user?.sendEmailVerification();
+
+                  // Navigator.of(context).pushNamedAndRemoveUntil(
+                  //   verifyEmailRoute,
+                  //   (route) => false,
+                  // );
+                  Navigator.of(context).pushNamed(verifyEmailRoute);
+                  //! we don't use pushNamedAndRemoveUntil(..) like before?
+
+                  //-I don't want to navigate to another routes when the users do sth wrong
+                  //-I want them to tap the <- button to go back to the register view to type email again (I think this way is better than the above option)
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'weak-password') {
-                    devtools.log('Weak password');
+                    await showErrorDialog(
+                      //if dont have a word 'await', showErrorDialog just return a future, not display a dialog for user to see
+                      context,
+                      'Weak password',
+                    );
                   } else if (e.code == 'email-already-in-use') {
-                    devtools.log('Email already in use');
+                    await showErrorDialog(
+                      context,
+                      'Email already in use',
+                    );
                   } else if (e.code == 'invalid-email') {
-                    devtools.log('Invalid email entered');
+                    await showErrorDialog(
+                      context,
+                      'Invalid email',
+                    );
+                  } else {
+                    await showErrorDialog(
+                      context,
+                      'Error: ${e.code}',
+                    );
                   }
+                } catch (e) {
+                  await showErrorDialog(
+                    context,
+                    e.toString(),
+                  );
                 }
               },
               child: const Text('Register')),
