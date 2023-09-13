@@ -133,6 +133,7 @@ class _NotesViewState extends State<NotesView> {
 }
 
 Future<bool> showLogOutDialog(BuildContext context) {
+  //function type is bool because the content is 'Are you...?'
   return showDialog<bool>(
     context: context,
     builder: (context) {

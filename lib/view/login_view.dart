@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
-
-import 'package:freecodecamp/constants/routes.dart'; //when you want to use a specific thing in this package, if not have show then will show everything in this package
+import 'package:freecodecamp/constants/routes.dart';
+import '../utilities/show_error_dialog.dart'; //when you want to use a specific thing in this package, if not have show then will show everything in this package
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -70,8 +69,7 @@ class _LoginViewState extends State<LoginView> {
 
                 //if user entered wrong account
                 try {
-                  final userCredential =
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  await FirebaseAuth.instance.signInWithEmailAndPassword(
                     email: email,
                     password: password,
                   );
@@ -80,13 +78,33 @@ class _LoginViewState extends State<LoginView> {
                     (route) => false,
                   );
                 } on FirebaseAuthException catch (e) {
+                  //handle exception about FirebaseAuthException
+
                   //write like this when you wanna catch specific error
                   //print(e.code); //view the error as a code not the text like print(e);
                   if (e.code == 'user-not-found') {
-                    devtools.log('User not found');
+                    await showErrorDialog(
+                      context,
+                      'User not found',
+                    );
                   } else if (e.code == 'wrong-password') {
-                    devtools.log('Wrong password');
+                    await showErrorDialog(
+                      context,
+                      'Wrong credentials',
+                    );
+                  } else {
+                    await showErrorDialog(
+                      context,
+                      'Error: ${e.code}',
+                    );
                   }
+                } catch (e) {
+                  //handle general exception
+                  //e in this case is Object. Everthing has a type is Object has a function call toString();
+                  await showErrorDialog(
+                    context,
+                    e.toString(),
+                  );
                 }
               },
               child: const Text('Login')),
