@@ -73,10 +73,20 @@ class _LoginViewState extends State<LoginView> {
                     email: email,
                     password: password,
                   );
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    notesRoute,
-                    (route) => false,
-                  );
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user?.emailVerified ?? false) {
+                    //if user's email is verified
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      notesRoute,
+                      (route) => false,
+                    );
+                  } else {
+                    //if user's email is NOT verified
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      verifyEmailRoute,
+                      (route) => false,
+                    );
+                  }
                 } on FirebaseAuthException catch (e) {
                   //handle exception about FirebaseAuthException
 
@@ -87,7 +97,7 @@ class _LoginViewState extends State<LoginView> {
                       context,
                       'User not found',
                     );
-                  } else if (e.code == 'wrong-password') {
+                  } else if (e.code == 'wrong-password ') {
                     await showErrorDialog(
                       context,
                       'Wrong credentials',
