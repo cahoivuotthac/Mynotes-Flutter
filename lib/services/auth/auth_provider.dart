@@ -1,4 +1,4 @@
-//! to encapsulate all the providers which are ways to signin/logout
+//! to encapsulate all the providers which help to signin/logout
 import 'package:freecodecamp/services/auth/auth_user.dart';
 
 abstract class AuthProvider {
