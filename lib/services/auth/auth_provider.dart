@@ -2,6 +2,7 @@
 import 'package:freecodecamp/services/auth/auth_user.dart';
 
 abstract class AuthProvider {
+  Future<void> initialized();
   AuthUser? get currentUser;
   Future<AuthUser?> logIn({
     required String email,

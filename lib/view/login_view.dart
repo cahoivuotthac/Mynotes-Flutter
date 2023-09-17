@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:freecodecamp/constants/routes.dart';
+import '../services/auth/auth_exceptions.dart';
+import '../services/auth/auth_service.dart';
 import '../utilities/show_error_dialog.dart'; //when you want to use a specific thing in this package, if not have show then will show everything in this package
 
 class LoginView extends StatefulWidget {
@@ -63,57 +64,50 @@ class _LoginViewState extends State<LoginView> {
           ),
           TextButton(
               onPressed: () async {
+                //this is a callback function
                 //grab email and password that users just entered
                 final email = _email.text;
                 final password = _password.text;
 
                 //if user entered wrong account
                 try {
-                  await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  await AuthService.firebase().logIn(
                     email: email,
                     password: password,
                   );
-                  final user = FirebaseAuth.instance.currentUser;
-                  if (user?.emailVerified ?? false) {
+                  final user = AuthService.firebase().currentUser;
+                  if (user?.isEmailVerified ?? false) {
                     //if user's email is verified
+                    // ignore: use_build_context_synchronously
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       notesRoute,
                       (route) => false,
                     );
                   } else {
                     //if user's email is NOT verified
+                    // ignore: use_build_context_synchronously
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       verifyEmailRoute,
                       (route) => false,
                     );
                   }
-                } on FirebaseAuthException catch (e) {
-                  //handle exception about FirebaseAuthException
-
-                  //write like this when you wanna catch specific error
-                  //print(e.code); //view the error as a code not the text like print(e);
-                  if (e.code == 'user-not-found') {
-                    await showErrorDialog(
-                      context,
-                      'User not found',
-                    );
-                  } else if (e.code == 'wrong-password ') {
-                    await showErrorDialog(
-                      context,
-                      'Wrong credentials',
-                    );
-                  } else {
-                    await showErrorDialog(
-                      context,
-                      'Error: ${e.code}',
-                    );
-                  }
-                } catch (e) {
-                  //handle general exception
-                  //e in this case is Object. Everthing has a type is Object has a function call toString();
+                } on UserNotFoundAuthException {
+                  // ignore: use_build_context_synchronously
                   await showErrorDialog(
                     context,
-                    e.toString(),
+                    'User not found',
+                  );
+                } on WrongPasswordAuthException {
+                  // ignore: use_build_context_synchronously
+                  await showErrorDialog(
+                    context,
+                    'Wrong credentials',
+                  );
+                } on GenericAuthException {
+                  // ignore: use_build_context_synchronously
+                  await showErrorDialog(
+                    context,
+                    'Authentication error',
                   );
                 }
               },

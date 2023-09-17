@@ -1,7 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:freecodecamp/constants/routes.dart';
 import 'package:freecodecamp/utilities/show_error_dialog.dart';
+import '../services/auth/auth_exceptions.dart';
+import '../services/auth/auth_service.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -68,52 +69,49 @@ class _RegisterViewState extends State<RegisterView> {
                 final password = _password.text;
                 try {
                   //in a try block, if things dont work properly it will go to code lines after on....
-                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  await AuthService.firebase().createUser(
                     email: email,
                     password: password,
                   );
 
                   //I want email verification to be sent right after users press register button
                   //the 'send email verification' button will be used when users have not be sent email for a long time
-                  final user = FirebaseAuth.instance.currentUser;
-                  await user?.sendEmailVerification();
+                  await AuthService.firebase().sendEmailVerification();
 
                   // Navigator.of(context).pushNamedAndRemoveUntil(
                   //   verifyEmailRoute,
                   //   (route) => false,
                   // );
+                  // ignore: use_build_context_synchronously
                   Navigator.of(context).pushNamed(verifyEmailRoute);
                   //! we don't use pushNamedAndRemoveUntil(..) like before?
 
                   //-I don't want to navigate to another routes when the users do sth wrong
                   //-I want them to tap the <- button to go back to the register view to type email again (I think this way is better than the above option)
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    await showErrorDialog(
-                      //if dont have a word 'await', showErrorDialog just return a future, not display a dialog for user to see
-                      context,
-                      'Weak password',
-                    );
-                  } else if (e.code == 'email-already-in-use') {
-                    await showErrorDialog(
-                      context,
-                      'Email already in use',
-                    );
-                  } else if (e.code == 'invalid-email') {
-                    await showErrorDialog(
-                      context,
-                      'Invalid email',
-                    );
-                  } else {
-                    await showErrorDialog(
-                      context,
-                      'Error: ${e.code}',
-                    );
-                  }
-                } catch (e) {
+                } on WeakPasswordAuthException {
+                  // ignore: use_build_context_synchronously
+                  await showErrorDialog(
+                    //if dont have a word 'await', showErrorDialog just return a future, not display a dialog for user to see
+                    context,
+                    'Weak password',
+                  );
+                } on EmailAlreadyInUseAuthException {
+                  // ignore: use_build_context_synchronously
                   await showErrorDialog(
                     context,
-                    e.toString(),
+                    'Email already in use',
+                  );
+                } on InvalidEmailAuthException {
+                  // ignore: use_build_context_synchronously
+                  await showErrorDialog(
+                    context,
+                    'Invalid email',
+                  );
+                } on GenericAuthException {
+                  // ignore: use_build_context_synchronously
+                  await showErrorDialog(
+                    context,
+                    'Fail to register',
                   );
                 }
               },

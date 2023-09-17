@@ -1,11 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:freecodecamp/constants/routes.dart';
+import 'package:freecodecamp/services/auth/auth_service.dart';
 import 'package:freecodecamp/view/login_view.dart';
+import 'package:freecodecamp/view/notes_view.dart';
 import 'package:freecodecamp/view/register_view.dart';
 import 'package:freecodecamp/view/verify_email_view.dart';
-import 'firebase_options.dart';
 //import 'package:firebase_auth/firebase_auth.dart'; => for FirebaseAuth.instance.createUserWithEmailAndPassword function
 //import 'firebase_options.dart'; // also for Firebase.initializeApp function
 //import 'package:firebase_core/firebase_core.dart'; => for Firebase.initializeApp function
@@ -43,19 +42,17 @@ class HomePage extends StatelessWidget {
       //why use FutureBuilder?
       //1. need to make sure that Firebase is initialized properly, after that other UI components have been runned
       //2. wait until future is done, builder will be runned upon future's result
-      future: Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      ),
+      future: AuthService.firebase().initialized(),
       builder: (context, snapshot) {
         //Future Builder is a Widget so the output is also a widget => we need to return a widget
         switch (snapshot.connectionState) {
           case ConnectionState
                 .done: //if future works then this UI will be showed on screen
             //print(FirebaseAuth.instance.currentUser); print some credential information about current-logined user
-            final user = FirebaseAuth.instance
+            final user = AuthService.firebase()
                 .currentUser; //to storage credential information about the current user in Firebase Authentication
             if (user != null) {
-              if (user.emailVerified) {
+              if (user.isEmailVerified) {
                 return const NotesView();
               } else {
                 return const VerifyEmailView();
@@ -80,83 +77,4 @@ class HomePage extends StatelessWidget {
       },
     );
   }
-}
-
-enum MenuAction {
-  logout
-} //enumeration called MenuAtion with a single value - logout
-
-class NotesView extends StatefulWidget {
-  const NotesView({super.key});
-
-  @override
-  State<NotesView> createState() => _NotesViewState();
-}
-
-class _NotesViewState extends State<NotesView> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Main UI'),
-          actions: [
-            //actions is list type, use [] for the type list
-            PopupMenuButton<MenuAction>(//display a popup menu when tapped icon
-                onSelected: (value) async {
-              //this will be called when a menu item is selected
-              //it takes the selected value as a parameter and performs an action based on the value
-              switch (value) {
-                case MenuAction
-                      .logout: //if the selected value is MenuAction.logout it shows a logout dialog
-                  final shouldLogout = await showLogOutDialog(context);
-                  if (shouldLogout) {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      loginRoute,
-                      (route) => false,
-                    );
-                  }
-              }
-            }, itemBuilder: (context) {
-              //create the menu items for the popup menu
-              //itemBuilder is list type
-              return const [
-                PopupMenuItem<MenuAction>(
-                  value: MenuAction.logout, //value is what programmer see
-                  child: Text('Log out'), //child is what user see
-                )
-              ];
-            })
-          ],
-        ),
-        body: const Text('Hello world'));
-  }
-}
-
-Future<bool> showLogOutDialog(BuildContext context) {
-  //function type is bool because the content is 'Are you...?'
-  return showDialog<bool>(
-    context: context,
-    builder: (context) {
-      //create an alert dialogue
-      return AlertDialog(
-          title: const Text('Sign out'),
-          content: const Text('Are you sure you want to log out?'),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context)
-                      .pop(false); //close the current dialog and return false
-                },
-                child: const Text('Cancel')),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Log out'))
-          ]);
-    },
-  ).then((value) =>
-      value ??
-      false); //when users dismiss the dialog (means that tap outside the dialog)
 }
