@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//put this in own file because we use this dialog in many parts of many views => it's easy for us to change dialog....
 Future<void> showErrorDialog(BuildContext context, String text) {
   return showDialog(
       context: context,
