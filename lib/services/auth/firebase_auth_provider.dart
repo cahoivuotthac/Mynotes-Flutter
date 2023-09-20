@@ -9,6 +9,25 @@ import '../../firebase_options.dart';
 
 class FirebaseAuthProvider implements AuthProvider {
   @override
+  Future<void> initialized() async {
+    //firebaseauth provider implements initialize function and it has actual implementation
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  @override
+  AuthUser? get currentUser {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      return AuthUser.fromFirebase(
+          user); //to check if user's email is verified or not
+    } else {
+      return null;
+    }
+  }
+
+  @override
   Future<AuthUser?> createUser({
     required String email,
     required String password,
@@ -36,17 +55,6 @@ class FirebaseAuthProvider implements AuthProvider {
       }
     } catch (_) {
       throw GenericAuthException();
-    }
-  }
-
-  @override
-  AuthUser? get currentUser {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      return AuthUser.fromFirebase(
-          user); //to check if user's email is verified or not
-    } else {
-      return null;
     }
   }
 
@@ -97,13 +105,5 @@ class FirebaseAuthProvider implements AuthProvider {
     } else {
       throw UserNotLoggedInAuthException();
     }
-  }
-
-  @override
-  Future<void> initialized() async {
-    //firebaseauth provider implements initialize function and it has actual implementation
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
   }
 }

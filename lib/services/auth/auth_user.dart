@@ -13,6 +13,7 @@ class AuthUser {
 
   //!factory constructor
   //make isEmailVerified required
-  factory AuthUser.fromFirebase(User user) =>
-      AuthUser(isEmailVerified: user.emailVerified);
+  factory AuthUser.fromFirebase(User user) => AuthUser(
+      isEmailVerified: user
+          .emailVerified); //write like this because we use 'named parameter' for constructor above
 }

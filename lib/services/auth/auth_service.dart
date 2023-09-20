@@ -22,7 +22,7 @@ class AuthService implements AuthProvider {
   AuthUser? get currentUser {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      return AuthUser.fromFirebase(user);
+      return AuthUser.fromFirebase(user); //to check if user is verified or not
     } else {
       return null;
     }
