@@ -41,22 +41,26 @@ void main() {
     );
 
     test('Create user should delegate to login function', () async {
-      final badEmailUser = provider.createUser(
-        email: 'foo@bar.com',
+      final badEmailUser = await provider.createUser(
+        email: "foo@bar.com",
         password: 'anypassword',
       );
       expect(
         badEmailUser,
-        throwsA(const TypeMatcher<UserNotFoundAuthException>()),
+        throwsA(
+          const TypeMatcher<UserNotFoundAuthException>(),
+        ),
       );
 
-      final badPasswordUser = provider.createUser(
-        email: 'someone@bar.com',
+      final badPasswordUser = await provider.createUser(
+        email: "someone@bar.com",
         password: 'foobar',
       );
       expect(
         badPasswordUser,
-        throwsA(const TypeMatcher<WrongPasswordAuthException>()),
+        throwsA(
+          const TypeMatcher<WrongPasswordAuthException>(),
+        ),
       );
 
       final user = await provider.createUser(
@@ -67,7 +71,7 @@ void main() {
       );
       expect(provider.currentUser,
           user); //expect the currentUser equal to this user
-      expect(provider.isInitialized, false);
+      expect(user!.isEmailVerified, false);
 
       test('Logged in user should be able to get verified', () async {
         await provider.sendEmailVerification();
@@ -79,8 +83,8 @@ void main() {
       test('Should be able to log out and log in again', () async {
         await provider.logOut();
         await provider.logIn(
-          email: 'hien',
-          password: 'phan',
+          email: 'email',
+          password: 'password',
         );
         final user = provider.currentUser;
         expect(user, isNotNull);
@@ -88,8 +92,6 @@ void main() {
     });
   });
 }
-
-class NotInitializedException implements Exception {}
 
 class MockAuthProvider implements AuthProvider {
   //use underscore to tell that these members are private
@@ -106,11 +108,28 @@ class MockAuthProvider implements AuthProvider {
   }
 
   @override
+  Future<AuthUser?> logIn({
+    required String email,
+    required String password,
+  }) {
+    if (isInitialized) throw NotInitializedException();
+    if (email == "foo@bar.com") {
+      throw UserNotFoundAuthException();
+    }
+    if (password == 'foobar') {
+      throw WrongPasswordAuthException();
+    }
+    const user = AuthUser(isEmailVerified: false);
+    _user = user;
+    return Future.value(user);
+  }
+
+  @override
   Future<AuthUser?> createUser({
     required String email,
     required String password,
   }) async {
-    if (!isInitialized) {
+    if (isInitialized) {
       //1. check to make sure we are initialized
       throw NotInitializedException();
     }
@@ -124,19 +143,6 @@ class MockAuthProvider implements AuthProvider {
 
   @override
   AuthUser? get currentUser => _user;
-
-  @override
-  Future<AuthUser?> logIn({
-    required String email,
-    required String password,
-  }) {
-    if (!isInitialized) throw NotInitializedException();
-    if (email == 'foo@bar.com') throw UserNotFoundAuthException();
-    if (password == 'foobar') throw WrongPasswordAuthException();
-    const user = AuthUser(isEmailVerified: false);
-    _user = user;
-    return Future.value(user);
-  }
 
   @override
   Future<void> logOut() async {
