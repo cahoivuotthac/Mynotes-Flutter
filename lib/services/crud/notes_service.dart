@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:freecodecamp/services/crud/crud_exceptions.dart';
 import 'package:path/path.dart'
@@ -32,6 +34,10 @@ const createNoteTable = '''CREATE TABLE "notes" (
 class NotesService {
   Database? _db; //create a private variable to store the database
 
+  List<DatabaseNote> _notes = []; //to store the notes in memory
+
+  final _noteStreamController = StreamController<
+      List<DatabaseNote>>.broadcast(); //broadcast: to allow multiple listeners
   Future<Iterable<DatabaseNote>> getAllNotes() async {
     final db = _getDatabaseOrThrow();
     final notes = await db.query(noteTable);
